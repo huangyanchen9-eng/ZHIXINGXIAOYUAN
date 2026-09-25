@@ -26,3 +26,51 @@ jobs:
       - run: npm test && npm run build
         working-directory: frontend
       - run: docker build -t zhixing-campus:ci .
+
+  publish:
+    # Pull requests run checks only. Publish only after main passes verification.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    concurrency:
+      group: publish-campus-image
+      cancel-in-progress: false
+    env:
+      IMAGE: ghcr.io/huangyanchen9-eng/zhixing-campus
+      REVISION: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build release image
+        run: |
+          docker build \
+            --label org.opencontainers.image.source=https://github.com/huangyanchen9-eng/ZHIXINGXIAOYUAN \
+            --label "org.opencontainers.image.revision=$REVISION" \
+            -t "$IMAGE:$REVISION" -t "$IMAGE:latest" .
+      - name: Check production startup
+        run: |
+          docker run -d --name campus-check -p 127.0.0.1:8000:8000 \
+            -e ALLOWED_ORIGINS=https://example.com "$IMAGE:$REVISION"
+          trap 'docker logs campus-check; docker rm -f campus-check' EXIT
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:8000/api/health; then
+              exit 0
+            fi
+            sleep 1
+          done
+          exit 1
+      - name: Sign in to GitHub Container Registry
+        env:
+          REGISTRY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REGISTRY_USER: ${{ github.actor }}
+        run: printf '%s' "$REGISTRY_TOKEN" | docker login ghcr.io -u "$REGISTRY_USER" --password-stdin
+      - name: Publish release image
+        run: |
+          docker push "$IMAGE:$REVISION"
+          docker push "$IMAGE:latest"
+      - name: Sign out
+        if: always()
+        run: docker logout ghcr.io
+
