@@ -1,0 +1,14 @@
+**/node_modules
+**/dist
+**/.env*
+**/data
+**/test-results
+**/screenshots
+**/playwright-report
+**/*.sqlite*
+**/*.db
+**/*.log
+.git
+智行校园代码
+*.pptx
+*.zip

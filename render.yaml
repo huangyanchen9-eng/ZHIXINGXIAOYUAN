@@ -1,0 +1,17 @@
+# Optional deployment template. Creating this service requires a paid plan.
+services:
+  - type: web
+    name: zhixing-campus
+    runtime: docker
+    plan: starter
+    region: singapore
+    healthCheckPath: /api/health
+    disk:
+      name: campus-data
+      mountPath: /data
+      sizeGB: 1
+    envVars:
+      - key: AMAP_KEY
+        sync: false
+      - key: AMAP_SECURITY_CODE
+        sync: false

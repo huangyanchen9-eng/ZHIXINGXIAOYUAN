@@ -1,0 +1,155 @@
+:root {
+  /* 海大青春蓝：产品自定义主题，并非学校官方 VI 色值。 */
+  --campus-primary: #1473c9;
+  --campus-primary-dark: #105697;
+  --campus-ink: #193b60;
+  --campus-text: #365a7c;
+  --campus-muted: #6a819a;
+  --campus-bg: #f5f9fe;
+  --campus-surface: #fbfdff;
+  --campus-soft: #eaf4ff;
+  --campus-tint: #f0f7ff;
+  --campus-border: #dbe8f6;
+  --campus-line: #e8eff8;
+  --campus-ring: #4b99e4;
+  font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  color: var(--campus-ink);
+  background: var(--campus-tint);
+  font-synthesis: none;
+  font-weight: 400;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  font-size: 14px;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+}
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+button,
+a,
+input,
+select,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+button {
+  cursor: pointer;
+}
+button:disabled {
+  cursor: wait;
+  opacity: 0.55;
+}
+button {
+  color: inherit;
+}
+a {
+  color: inherit;
+  text-decoration: none;
+}
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+h1 {
+  font-size: 30px;
+  line-height: 1.4;
+  font-weight: 650;
+  letter-spacing: -1px;
+}
+h2 {
+  font-size: 18px;
+  font-weight: 650;
+  line-height: 1.5;
+}
+h3 {
+  font-size: 16px;
+  font-weight: 600;
+}
+p {
+  line-height: 1.9;
+}
+small {
+  font-size: 12px;
+}
+input,
+select,
+textarea {
+  width: 100%;
+  border: 1px solid var(--campus-border);
+  background: #fff;
+  border-radius: 10px;
+  padding: 10px 12px;
+  color: var(--campus-ink);
+  outline: none;
+  min-height: 42px;
+}
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--campus-ring);
+  box-shadow: 0 0 0 3px #1473c912;
+}
+input[type="checkbox"] {
+  width: 17px;
+  min-height: 17px;
+  accent-color: var(--campus-primary);
+  vertical-align: middle;
+  margin: 0 7px 0 0;
+}
+input[type="range"] {
+  accent-color: var(--campus-primary);
+  padding: 5px 0;
+  box-shadow: none;
+}
+button:focus-visible,
+a:focus-visible {
+  outline: 3px solid #d7ac5e;
+  outline-offset: 4px;
+}
+textarea {
+  resize: vertical;
+}
+button {
+  transition:
+    background 0.16s,
+    transform 0.16s;
+}
+button:hover {
+  filter: brightness(0.98);
+}
+button:active {
+  transform: translateY(1px);
+}
+::selection {
+  background: var(--campus-border);
+}
+svg {
+  flex-shrink: 0;
+}
+summary {
+  cursor: pointer;
+}
+dialog::backdrop {
+  background: #10569755;
+  backdrop-filter: blur(3px);
+}
+img {
+  max-width: 100%;
+}
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+    scroll-behavior: auto !important;
+  }
+}
