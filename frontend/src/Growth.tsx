@@ -353,11 +353,11 @@ export function Assistant() {
         label = "去看看三餐搭配";
       } else if (/课|迟到|路|走|去|图书馆/.test(text)) {
         const course = data!.records.find((r) => r.kind === "course");
-        reply = `先别着急，我们一步一步来。${course ? "课表里有“" + course.title + "”，地点是" + course.place + "。" : ""}在地图中确认起终点，就能查看真实路程与预计时间；我不会在这里编造路线或到达时间。`;
+        reply = `先别着急，我们一步一步来。${course ? "课表里有“" + course.title + "”，地点是" + course.place + "。" : ""}在出行页确认起终点，核实路网后查看登记路程与估算时间；我不会在这里编造路线或到达时间。`;
         link =
           "/travel" +
           (course ? "?to=" + encodeURIComponent(course.place ?? "") : "");
-        label = "打开真实路线规划";
+        label = "打开校园路线规划";
       } else if (/焦虑|难过|累|心情|压力|烦/.test(text)) {
         reply =
           "听起来今天有些不容易。先给自己一点缓冲，可以暂时放下手头的事，喝口水，或者找信任的人聊聊。你也可以把感受记下来，不需要写得很完整。";

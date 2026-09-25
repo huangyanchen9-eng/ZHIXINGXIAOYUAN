@@ -86,6 +86,7 @@ export interface Place {
   position: [number, number];
 }
 export interface RouteResult {
+  sample?: boolean;
   distance: number;
   seconds: number;
   path: [number, number][];

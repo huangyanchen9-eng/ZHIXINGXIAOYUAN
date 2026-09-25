@@ -10,8 +10,4 @@ services:
       name: campus-data
       mountPath: /data
       sizeGB: 1
-    envVars:
-      - key: AMAP_KEY
-        sync: false
-      - key: AMAP_SECURITY_CODE
-        sync: false
+    # Campus graph is the default; no map credentials are required.

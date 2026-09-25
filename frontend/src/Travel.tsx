@@ -1,3 +1,4 @@
+import { useRouting, CampusDiagram } from "./CampusRouting";
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import {
@@ -11,15 +12,7 @@ import {
 } from "@phosphor-icons/react";
 import { useApp } from "./store";
 import { PageHead, Card, Field, Badge, Empty } from "./ui";
-import {
-  mapConfigured,
-  loadMap,
-  campusCenter,
-  searchPlaces,
-  getRoute,
-  locate,
-  resolvePlace,
-} from "./mapService";
+import { mapConfigured, loadMap, campusCenter, locate } from "./mapService";
 import type { Place, RouteResult } from "./types";
 import { uid, minutes, clock, courseForDestination } from "./domain";
 import { today } from "./seed";
@@ -43,6 +36,7 @@ function MapView({
     void (async () => {
       try {
         const A = await loadMap();
+        if (!active) return;
         const c = await campusCenter();
         if (!active) return;
         map.current = new A.Map(el.current, {
@@ -110,11 +104,13 @@ function PlaceInput({
   value,
   onChange,
   initial = "",
+  searchPlaces,
 }: {
   label: string;
   value: Place | null;
   onChange: (v: Place | null) => void;
   initial?: string;
+  searchPlaces: (q: string) => Promise<Place[]>;
 }) {
   const [query, setQuery] = useState(value?.name ?? initial),
     [items, setItems] = useState<Place[]>([]),
@@ -188,6 +184,8 @@ function PlaceInput({
   );
 }
 export function Travel() {
+  const routing = useRouting();
+  const { searchPlaces, getRoute } = routing;
   const [params] = useSearchParams(),
     { data, update, notify } = useApp();
   const [from, setFrom] = useState<Place | null>(null),
@@ -201,9 +199,13 @@ export function Travel() {
     [busy, setBusy] = useState(false);
   const version = useRef(0);
   useEffect(() => {
+    setFrom(null);
+    setTo(null);
+  }, [routing.provider, routing.graph]);
+  useEffect(() => {
     setRoute(null);
     version.current++;
-  }, [from, to, mode]);
+  }, [from, to, mode, routing.provider, routing.graph, routing.allowSample]);
   const course = courseForDestination(
     data!.records,
     to?.name ?? "",
@@ -216,39 +218,46 @@ export function Travel() {
       <PageHead
         eyebrow="GO EXPLORE / 校园出行"
         title="下一站，去你想去的地方"
-        description="真实校园地图，支持步行与骑行。先搜索并确认地点，再规划路线。"
+        description="校园独立路网：按登记道路规划出行，无需高德充值。"
         action={
           <Link className={s.secondary} to="/planner">
             多任务行程 <ArrowRight size={17} />
           </Link>
         }
       />
+      {routing.controls}
       <div className={s.mapLayout}>
         <Card>
           <PlaceInput
+            key={"place-0" + routing.provider + JSON.stringify(routing.graph)}
+            searchPlaces={searchPlaces}
             label="出发地点"
             value={from}
             onChange={setFrom}
             initial={params.get("from") ?? ""}
           />
-          <button
-            className={s.textButton}
-            disabled={busy}
-            onClick={async () => {
-              setBusy(true);
-              try {
-                setFrom(await locate());
-              } catch (e) {
-                setError((e as Error).message);
-              } finally {
-                setBusy(false);
-              }
-            }}
-          >
-            <NavigationArrow size={15} />
-            使用当前位置
-          </button>
+          {routing.provider === "amap" && (
+            <button
+              className={s.textButton}
+              disabled={busy}
+              onClick={async () => {
+                setBusy(true);
+                try {
+                  setFrom(await locate());
+                } catch (e) {
+                  setError((e as Error).message);
+                } finally {
+                  setBusy(false);
+                }
+              }}
+            >
+              <NavigationArrow size={15} />
+              使用当前位置
+            </button>
+          )}
           <PlaceInput
+            key={"place-1" + routing.provider + JSON.stringify(routing.graph)}
+            searchPlaces={searchPlaces}
             label="目的地点"
             value={to}
             onChange={setTo}
@@ -308,7 +317,7 @@ export function Travel() {
               }
             }}
           >
-            {busy ? "正在查询真实路线…" : "规划路线"}
+            {busy ? "正在计算路线…" : "规划路线"}
           </button>
           {error && (
             <p className={s.error} role="alert">
@@ -316,8 +325,8 @@ export function Travel() {
             </p>
           )}
           <p className={s.note}>
-            天气与拥堵为手选情景，仅生成提示，不修改地图服务的路线时间。跑步按 7
-            分钟 / 公里估算。
+            天气与拥堵为手选情景，仅生成提示，不修改路线估算时间。跑步按 7 分钟
+            / 公里估算。
           </p>
           {route && (
             <div className={s.routeSummary}>
@@ -326,7 +335,13 @@ export function Travel() {
               </h3>
               <p>
                 {(route.distance / 1000).toFixed(2)} km ·{" "}
-                {mode === "跑步" ? "配速估算" : "高德路线结果"}
+                {routing.provider === "campus"
+                  ? route.sample
+                    ? "示例距离与时间 · 不用于实际导航"
+                    : "登记路网 · 时间为估算"
+                  : mode === "跑步"
+                    ? "配速估算"
+                    : "高德路线结果"}
               </p>
               <p>
                 预计{" "}
@@ -375,7 +390,13 @@ export function Travel() {
                         place: to!.name,
                         distance: route.distance / 1000,
                         mode,
-                        source: "地图",
+                        source: route.sample ? "示例" : "地图",
+                        note:
+                          routing.provider === "campus"
+                            ? route.sample
+                              ? "校园路网预演，位置与距离待核实"
+                              : "按录入者核实的校园路网估算"
+                            : undefined,
                         done: false,
                       },
                     ],
@@ -389,7 +410,16 @@ export function Travel() {
           )}
         </Card>
         <div>
-          <MapView route={route} from={from} to={to} />
+          {routing.provider === "campus" ? (
+            <CampusDiagram
+              graph={routing.graph}
+              route={route}
+              from={from}
+              to={to}
+            />
+          ) : (
+            <MapView route={route} from={from} to={to} />
+          )}
           {route && (
             <Card>
               <h2>路线详情</h2>
@@ -412,6 +442,8 @@ interface Stop {
   duration: number;
 }
 export function Planner() {
+  const routing = useRouting();
+  const { searchPlaces, getRoute, resolvePlace } = routing;
   const [params] = useSearchParams(),
     { data, update, notify } = useApp();
   const [stops, setStops] = useState<Stop[]>(() =>
@@ -446,16 +478,40 @@ export function Planner() {
     [bias, setBias] = useState(0.3),
     [busy, setBusy] = useState(false),
     [error, setError] = useState(""),
-    [result, setResult] = useState<{
+    [storedResult, setResult] = useState<{
+      key: string;
       routes: RouteResult[];
       places: Place[];
     } | null>(null),
     [demo, setDemo] = useState(false);
+  const planKey = JSON.stringify([
+    stops,
+    origin,
+    mode,
+    date,
+    time,
+    routing.provider,
+    routing.graph,
+    routing.allowSample,
+  ]);
+  const result = storedResult?.key === planKey ? storedResult : null;
   const generation = useRef(0);
+  useEffect(() => {
+    setOrigin(null);
+  }, [routing.provider, routing.graph]);
   useEffect(() => {
     setResult(null);
     generation.current++;
-  }, [stops, origin, mode, date, time]);
+  }, [
+    stops,
+    origin,
+    mode,
+    date,
+    time,
+    routing.provider,
+    routing.graph,
+    routing.allowSample,
+  ]);
   const patch = (id: string, key: keyof Stop, value: string | number) =>
     setStops(stops.map((x) => (x.id === id ? { ...x, [key]: value } : x)));
   const move = (i: number, n: number) => {
@@ -470,11 +526,14 @@ export function Planner() {
       <PageHead
         eyebrow="MAKE A PLAN / 多任务行程"
         title="想做的事，顺路一起完成"
-        description="为每一站留出时间，按自己的顺序出发。普通规划使用真实路线；智能优化单独提供演示。"
+        description="为每一站留出时间，按所选路网逐段计算。智能优化仍为独立演示。"
       />
+      {routing.controls}
       <Card>
         <div className={s.formGrid}>
           <PlaceInput
+            key={"place-2" + routing.provider + JSON.stringify(routing.graph)}
+            searchPlaces={searchPlaces}
             label="行程起点"
             value={origin}
             onChange={setOrigin}
@@ -611,7 +670,7 @@ export function Planner() {
           </button>
         </div>
         <p className={s.note}>
-          每项任务的数字为停留分钟。地点不明确时请先到校园导航检索完整名称；规划结果显示真实查得的地点供核对。
+          每项任务的数字为停留分钟。地点不明确时请先到校园导航检索完整名称；请先核对路网地点与道路数据。
         </p>
         <Field
           label={`健康偏好 ${(bias * 100).toFixed(0)}%（供后续智能优化服务使用）`}
@@ -657,13 +716,16 @@ export function Planner() {
                   routes: RouteResult[] = [];
                 let previous = origin;
                 for (const stop of stops) {
+                  if (generation.current !== version) return;
                   const place = await resolvePlace(stop.place);
+                  if (generation.current !== version) return;
                   routes.push(await getRoute(previous, place, mode));
+                  if (generation.current !== version) return;
                   places.push(place);
                   previous = place;
                 }
                 if (generation.current === version)
-                  setResult({ places, routes });
+                  setResult({ places, routes, key: planKey });
               } catch (e) {
                 setError((e as Error).message);
               } finally {
@@ -671,7 +733,7 @@ export function Planner() {
               }
             }}
           >
-            {busy ? "逐段查询真实路线…" : "按当前顺序规划"}
+            {busy ? "逐段计算路线…" : "按当前顺序规划"}
           </button>
           <button className={s.secondary} onClick={() => setDemo(!demo)}>
             查看智能优化演示
@@ -701,6 +763,11 @@ export function Planner() {
       {result && (
         <Card className={s.settingsGroup}>
           <h2>这趟行程，安排好了</h2>
+          {result.routes.some((r) => r.sample) && (
+            <p className={s.notice}>
+              示例预演：包含待核实的校园位置、距离或道路，不能用于实际导航。
+            </p>
+          )}
           {result.routes.map((route, i) => {
             const arrival =
               minutes(time) + elapsed + Math.ceil(route.seconds / 60);
@@ -753,7 +820,12 @@ export function Planner() {
                   mode,
                   distance: result.routes[i].distance / 1000,
                   done: false,
-                  source: "地图" as const,
+                  source: result.routes[i].sample
+                    ? ("示例" as const)
+                    : ("地图" as const),
+                  note: result.routes[i].sample
+                    ? "校园路网预演，距离与道路待核实"
+                    : undefined,
                 };
                 acc += stop.duration;
                 return record;
