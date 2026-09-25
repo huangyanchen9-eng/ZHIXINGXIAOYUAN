@@ -89,6 +89,7 @@ function Editor({
   close: () => void;
   save: (r: LifeRecord) => Promise<void>;
 }) {
+  const { courseReference } = useApp();
   const kind = typeof initial === "string" ? initial : initial.kind;
   const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
@@ -166,6 +167,18 @@ function Editor({
       title={`${typeof initial === "string" ? "新增" : "编辑"}${kindLabels[kind]}记录`}
       onClose={close}
     >
+      {kind === "course" && courseReference && (
+        <div>
+          <p className={s.note}>
+            对照图片填写课程信息。图片仅用于当前录入，不会上传或保存到账号。
+          </p>
+          <img
+            className={s.uploadPreview}
+            src={courseReference}
+            alt="录入时参考的课表图片"
+          />
+        </div>
+      )}
       <form
         noValidate
         onSubmit={async (e) => {

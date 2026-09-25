@@ -19,6 +19,8 @@ type Context = {
   setUser: (p: Profile) => void;
   notify: (s: string) => void;
   toast: string;
+  courseReference: string;
+  setCourseReference: (image: string) => void;
   editor: LifeRecord | Kind | null;
   edit: (r: LifeRecord | Kind | null) => void;
   saveRecord: (r: LifeRecord) => Promise<void>;
@@ -30,7 +32,12 @@ export function Provider({ children }: { children: ReactNode }) {
     [data, setData] = useState<UserData | null>(null),
     [ready, setReady] = useState(false),
     [toast, setToast] = useState(""),
-    [editor, edit] = useState<LifeRecord | Kind | null>(null);
+    [editor, setEditor] = useState<LifeRecord | Kind | null>(null),
+    [courseReference, setCourseReference] = useState("");
+  const edit = (r: LifeRecord | Kind | null) => {
+    setEditor(r);
+    if (r === null) setCourseReference("");
+  };
   const ref = useRef<UserData | null>(null),
     userRef = useRef<Profile | null>(null),
     sessionEpoch = useRef(0),
@@ -162,6 +169,8 @@ export function Provider({ children }: { children: ReactNode }) {
         setUser,
         notify,
         toast,
+        courseReference,
+        setCourseReference,
         editor,
         edit,
         saveRecord,

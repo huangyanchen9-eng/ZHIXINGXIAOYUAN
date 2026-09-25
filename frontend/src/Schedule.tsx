@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   CalendarBlank,
@@ -14,7 +14,7 @@ import { courseOnDate, uid, weeksList, minutes } from "./domain";
 import type { LifeRecord } from "./types";
 import s from "./App.module.css";
 export function Schedule() {
-  const { data, edit, update, notify } = useApp();
+  const { data, edit, update, notify, setCourseReference } = useApp();
   const [offset, setOffset] = useState(0),
     [upload, setUpload] = useState(false),
     [preview, setPreview] = useState(""),
@@ -23,6 +23,13 @@ export function Schedule() {
     [result, setResult] = useState<LifeRecord | null>(null),
     [uploadError, setUploadError] = useState("");
   const file = useRef<HTMLInputElement>(null);
+  const readVersion = useRef(0);
+  useEffect(
+    () => () => {
+      readVersion.current++;
+    },
+    [],
+  );
   const date = new Date();
   date.setDate(date.getDate() - ((date.getDay() + 6) % 7) + offset * 7);
   const days = Array.from({ length: 7 }, (_, i) => {
@@ -36,6 +43,8 @@ export function Schedule() {
     ) + 1;
   const courses = data!.records.filter((r) => r.kind === "course");
   const closeUpload = () => {
+    readVersion.current++;
+    setBusy(false);
     setUpload(false);
     setPreview("");
     setResult(null);
@@ -52,7 +61,7 @@ export function Schedule() {
           <div className={s.buttonRow}>
             <button className={s.secondary} onClick={() => setUpload(true)}>
               <UploadSimple size={18} />
-              导入课表
+              上传课表图片
             </button>
             <AddButton onClick={() => edit("course")}>添加课程</AddButton>
           </div>
@@ -153,7 +162,7 @@ export function Schedule() {
             courseOnDate(r, today, data!.preferences.termStart),
           ) && <Empty title="今天没有课程" />}
           <p className={s.note}>
-            提醒显示在应用内；出发时间需先获取真实路线后计算。
+            提醒显示在应用内；出发时间需先核实路线后估算。
           </p>
         </Card>
         <Card>
@@ -186,7 +195,11 @@ export function Schedule() {
         </Card>
       </div>
       {upload && (
-        <Modal title="导入课表" onClose={closeUpload}>
+        <Modal title="上传课表图片" onClose={closeUpload}>
+          <p className={s.note}>
+            选择图片 → 预览 → 对照录入/校对 → 保存课程。支持 PNG、JPG，最大 8
+            MB；自动识别以后接入。
+          </p>
           <p className={s.notice}>
             OCR
             流程演示：示例可模拟识别；自己的图片仅预览并手动录入，尚未接入识别服务。
@@ -202,6 +215,9 @@ export function Schedule() {
             <button
               className={s.secondary}
               onClick={() => {
+                readVersion.current++;
+                setBusy(false);
+                setUploadError("");
                 setSample(true);
                 setPreview("");
                 setResult(null);
@@ -218,6 +234,12 @@ export function Schedule() {
             onChange={(e) => {
               const f = e.target.files?.[0];
               if (!f) return;
+              const version = ++readVersion.current;
+              e.target.value = "";
+              setBusy(false);
+              setPreview("");
+              setSample(false);
+              setResult(null);
               if (
                 !["image/png", "image/jpeg"].includes(f.type) ||
                 f.size > 8 * 1024 * 1024
@@ -227,7 +249,12 @@ export function Schedule() {
               }
               setUploadError("");
               const reader = new FileReader();
+              reader.onerror = () => {
+                if (readVersion.current === version)
+                  setUploadError("图片读取失败，请重新选择");
+              };
               reader.onload = () => {
+                if (readVersion.current !== version) return;
                 setPreview(String(reader.result));
                 setSample(false);
                 setResult(null);
@@ -250,6 +277,7 @@ export function Schedule() {
               <button
                 className={s.primary}
                 onClick={() => {
+                  setCourseReference(preview);
                   closeUpload();
                   edit("course");
                 }}
@@ -268,8 +296,10 @@ export function Schedule() {
                 className={s.primary}
                 disabled={busy}
                 onClick={async () => {
+                  const version = ++readVersion.current;
                   setBusy(true);
                   await new Promise((r) => setTimeout(r, 450));
+                  if (version !== readVersion.current) return;
                   setResult({
                     id: uid(),
                     kind: "course",
