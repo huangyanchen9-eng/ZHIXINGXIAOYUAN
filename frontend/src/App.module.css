@@ -875,6 +875,7 @@
 }
 .formActions {
   display: flex;
+  flex-wrap: wrap;
   gap: 10px;
   justify-content: flex-end;
   border-top: 1px solid var(--campus-soft);
@@ -2450,5 +2451,306 @@ th {
   }
   .profileHero p {
     font-size: 10px;
+  }
+}
+
+/* Mobile-first campus glass shell. The backdrop and controls are shared by
+   authenticated routes; data services and authentication remain unchanged. */
+.glassShell {
+  min-height: 100dvh;
+  position: relative;
+  isolation: isolate;
+  color: #173e51;
+}
+.campusBackdrop,
+.campusShade {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+}
+.campusBackdrop img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 48% 50%;
+}
+.campusShade {
+  z-index: -1;
+  background: linear-gradient(180deg, #153b5660, #1737441a 45%, #0c304854);
+}
+.phonePage {
+  width: min(100%, 1008px);
+  margin: 0 auto;
+  padding: 0 24px 114px;
+}
+.glassPage {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px 130px;
+}
+.glassHeader {
+  height: 78px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+}
+.glassShell button,
+.glassShell .primary,
+.glassShell .secondary,
+.glassShell .roundLink {
+  background: #ffffff59;
+  border: 1px solid #ffffff85;
+  color: #173e51;
+  box-shadow:
+    inset 0 1px 0 #ffffff66,
+    0 5px 18px #15324612;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+.glassShell button:hover,
+.glassShell .primary:hover,
+.glassShell .secondary:hover {
+  background: #ffffff80;
+}
+.glassShell button:disabled {
+  opacity: 0.55;
+}
+.glassShell :is(button, a):focus-visible {
+  outline: 3px solid #b4e4ff;
+  outline-offset: 4px;
+}
+.glassShell .controlButton {
+  order: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 0 14px;
+  min-height: 44px;
+  border-radius: 17px;
+  color: white;
+  background: #ffffff35;
+}
+.controlButton span {
+  font-size: 11px;
+}
+.glassIdentity {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  color: #fff;
+  font-size: 10px;
+  text-shadow: 0 1px 7px #123c55;
+}
+.glassIdentity a {
+  display: grid;
+  place-items: center;
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  border: 1px solid #ffffff80;
+  background: #ffffff35;
+  backdrop-filter: blur(18px);
+}
+.glassMain {
+  min-width: 0;
+  touch-action: auto;
+}
+.glassShell .glassRecord {
+  position: fixed;
+  right: max(24px, calc((100vw - 460px) / 2));
+  bottom: calc(97px + env(safe-area-inset-bottom));
+  z-index: 35;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 42px;
+  padding: 7px 12px;
+  border-radius: 22px;
+  font-size: 11px;
+  background: #ffffff59;
+}
+.glassNav {
+  position: fixed;
+  z-index: 40;
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(calc(100% - 32px), 440px);
+  height: 69px;
+  border: 1px solid #ffffff85;
+  border-radius: 29px;
+  padding: 5px;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  align-items: stretch;
+  background: #ffffff59;
+  backdrop-filter: blur(26px) saturate(0.85);
+  -webkit-backdrop-filter: blur(26px) saturate(0.85);
+  box-shadow:
+    inset 0 1px 0 #ffffffad,
+    0 10px 40px #12344935;
+  touch-action: pan-y pinch-zoom;
+}
+.glassNav a {
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  font-size: 10px;
+  color: #163c51;
+  border-radius: 24px;
+}
+.navSlider {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  bottom: 5px;
+  width: calc((100% - 10px) / 5);
+  border-radius: 24px;
+  border: 1px solid #ffffffba;
+  background: #ffffff61;
+  box-shadow: 0 3px 12px #244b5812;
+  transition: transform 0.25s ease;
+  pointer-events: none;
+}
+.glassNav .glassNavActive {
+  color: #07579d;
+  font-weight: 650;
+}
+.glassShell .modal {
+  background: #f0f3efc9;
+  border: 1px solid #ffffffd0;
+  border-radius: 28px;
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  color: #173e51;
+}
+.glassShell .modal::backdrop {
+  background: #16384e33;
+  backdrop-filter: blur(8px);
+}
+.glassShell .modalHead {
+  background: transparent;
+  border-bottom-color: #ffffff9c;
+}
+.controlGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 13px;
+}
+.controlGrid a {
+  min-height: 145px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 9px;
+  padding: 20px;
+  border: 1px solid #ffffffb0;
+  background: #ffffff59;
+  border-radius: 23px;
+  box-shadow: inset 0 1px 0 #fff9;
+}
+.controlGrid a:hover {
+  background: #ffffffa0;
+}
+.controlGrid strong {
+  font-size: 15px;
+  font-weight: 550;
+}
+.controlGrid small {
+  font-size: 10px;
+}
+.controlHint {
+  margin: 20px 0 0;
+  font-size: 11px;
+  color: #476375;
+}
+.glassShell .pageHead {
+  color: #fff;
+  text-shadow: 0 1px 10px #153d5599;
+}
+.glassShell .pageHead .eyebrow,
+.glassShell .pageHead p {
+  color: #ffffffed;
+}
+.glassShell .card,
+.glassShell .featureCard {
+  background: #f8faf0a6;
+  border: 1px solid #ffffffa6;
+  border-radius: 24px;
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  box-shadow:
+    inset 0 1px 0 #ffffff95,
+    0 10px 30px #12324615;
+}
+.glassShell .sectionTitle {
+  color: white;
+  text-shadow: 0 1px 7px #143444;
+}
+.glassShell .sectionTitle a {
+  color: white;
+}
+.glassShell input,
+.glassShell select,
+.glassShell textarea {
+  background: #ffffffa8;
+}
+@media (max-width: 700px) {
+  .phonePage,
+  .glassPage {
+    padding-left: 23px;
+    padding-right: 23px;
+  }
+  .glassHeader {
+    height: 74px;
+  }
+  .campusBackdrop img {
+    object-position: 46% center;
+  }
+  .glassPage .pageHead h1 {
+    font-size: 25px;
+  }
+  .glassShell .glassRecord {
+    right: 24px;
+  }
+  .controlGrid a {
+    padding: 17px;
+    min-height: 137px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .navSlider {
+    transition: none;
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .glassNav,
+  .glassShell .modal,
+  .glassShell .card,
+  .glassShell button,
+  .controlGrid a {
+    background: #edf2ed;
+    color: #173e51;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+@supports not (backdrop-filter: blur(1px)) {
+  .glassNav,
+  .glassShell .modal,
+  .glassShell .card,
+  .glassShell button,
+  .controlGrid a {
+    background: #edf2ed;
+    color: #173e51;
   }
 }

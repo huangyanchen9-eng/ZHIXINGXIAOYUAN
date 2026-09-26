@@ -1,0 +1,364 @@
+.home {
+  min-height: calc(100svh - 196px);
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin: 0 auto;
+  color: #fff;
+}
+.intro {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 12px;
+  padding-top: 12px;
+}
+.widgets {
+  display: grid;
+  grid-template-columns: 106px minmax(0, 1fr);
+  align-self: start;
+  width: 100%;
+  max-width: 100%;
+  align-items: center;
+  gap: 13px 12px;
+  margin: 0;
+}
+.widgetCaption {
+  text-align: right;
+  color: white;
+  font-family: "Noto Serif SC", "Songti SC", "STSong", "SimSun", serif;
+  font-size: 16px;
+  line-height: 1.9;
+  text-shadow: 0 1px 6px #173d55;
+}
+.widgetCaption span {
+  display: block;
+  white-space: nowrap;
+}
+.widgetCaption small {
+  display: block;
+  font-family: "Times New Roman", Times, serif;
+  font-size: 14px;
+  font-style: italic;
+}
+.smallWidgets {
+  grid-column: 1 / -1;
+  justify-self: end;
+  display: flex;
+  gap: 13px;
+}
+.steps {
+  justify-self: center;
+  width: 106px;
+  height: 106px;
+  padding: 5px;
+  border-radius: 50%;
+  background: conic-gradient(#e3f4ff var(--progress), #ffffff35 0);
+  box-shadow: 0 8px 24px #17344020;
+  flex-shrink: 0;
+}
+.steps > div {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  width: 100%;
+  height: 100%;
+  background: #293e4540;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+.steps strong {
+  font-size: 23px;
+  font-weight: 500;
+  line-height: 1.35;
+  letter-spacing: -0.8px;
+}
+.steps span {
+  font-size: 9px;
+  letter-spacing: 1px;
+}
+.miniWidget {
+  width: 69px;
+  height: 69px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  background: #ffffff35;
+  border: 1px solid #ffffff70;
+  box-shadow:
+    inset 0 1px 0 #ffffff65,
+    0 5px 20px #18344214;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  text-shadow: 0 1px 4px #15394370;
+}
+.miniWidget strong {
+  font-size: 19px;
+  line-height: 1.2;
+  font-weight: 500;
+  margin: 3px 0;
+}
+.miniWidget small {
+  font-size: 9px;
+  margin-left: 3px;
+}
+.miniWidget span {
+  font-size: 9px;
+}
+.learningTitle {
+  display: block;
+  align-self: flex-start;
+  color: white;
+  text-shadow: 0 2px 15px #0b273f75;
+}
+.learningTitle h1 {
+  font-family: "Noto Serif SC", "Songti SC", "STSong", "SimSun", serif;
+  font-size: clamp(42px, 6.1vw, 60px);
+  font-weight: 500;
+  line-height: 1.6;
+  letter-spacing: 0.02em;
+  margin: 0;
+  text-wrap: balance;
+}
+.breathingSpace {
+  flex: 1;
+  min-height: 45px;
+}
+.learningTitle h1 > span {
+  display: block;
+  text-wrap: balance;
+}
+.floatingCard {
+  display: flex;
+  flex-direction: column;
+  align-self: flex-end;
+  width: 270px;
+  min-height: 330px;
+  margin-right: 9px;
+  transform: perspective(950px) rotateY(-10deg);
+  transform-origin: center;
+  color: #173e51;
+  padding: 15px 21px 20px;
+  border: 1px solid #ffffff90;
+  border-radius: 28px;
+  background: rgb(255 255 255 / 30%);
+  box-shadow:
+    inset 0 1px 0 #ffffffb0,
+    0 12px 32px #132e4324;
+  backdrop-filter: blur(26px) saturate(0.8);
+  -webkit-backdrop-filter: blur(26px) saturate(0.8);
+}
+.floatingTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+}
+.floatingTop > span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.floatingTop i {
+  width: 5px;
+  height: 5px;
+  background: #1473c9;
+  border-radius: 50%;
+}
+.floatingTop button,
+.eventSummary button {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  padding: 0;
+}
+.eventTime {
+  font-size: 38px;
+  line-height: 1.2;
+  font-weight: 350;
+  letter-spacing: -1.5px;
+  margin: 20px 0 24px;
+  font-variant-numeric: tabular-nums;
+}
+.eventTime > span {
+  display: block;
+  margin-top: 7px;
+  font-size: 11px;
+  letter-spacing: 0;
+  font-weight: 450;
+}
+.eventSummary {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 12px;
+}
+.eventSummary button {
+  align-self: flex-end;
+  flex-shrink: 0;
+}
+.eventSummary > div {
+  min-width: 0;
+}
+.eventSummary h2 {
+  font-size: 17px;
+  font-weight: 550;
+  overflow-wrap: anywhere;
+}
+.eventSummary p {
+  font-size: 11px;
+  line-height: 1.6;
+  margin-top: 5px;
+}
+.actions {
+  display: flex;
+  align-self: flex-end;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+}
+.recordButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 8px 15px;
+  border-radius: 25px;
+}
+.planButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  align-self: flex-end;
+  margin: 0;
+  min-height: 44px;
+  padding: 8px 20px;
+  border-radius: 25px;
+  background: #ffffff38;
+  border: 1px solid #ffffff6b;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  color: white;
+  font-size: 12px;
+  text-shadow: 0 1px 5px #113c54;
+}
+.agendaDate {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 12px;
+  margin-bottom: 15px;
+}
+.agendaDate a,
+.courseLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.courseLink {
+  font-size: 11px;
+  margin-top: 6px;
+  color: #125d93;
+}
+.tomorrow {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 20px;
+  border-top: 1px solid #ffffff80;
+  padding-top: 15px;
+  font-size: 12px;
+}
+@media (max-width: 700px) {
+  .intro {
+    gap: 12px;
+  }
+  .widgets {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 9px;
+  }
+  .widgetCaption {
+    grid-row: 2;
+    text-align: right;
+    font-size: 12px;
+  }
+  .widgetCaption small {
+    font-size: 12px;
+  }
+  .learningTitle h1 {
+    font-size: clamp(24px, 7vw, 40px);
+    line-height: 1.8;
+  }
+  .steps {
+    width: 88px;
+    height: 88px;
+  }
+  .smallWidgets {
+    grid-row: 3;
+  }
+  .floatingCard {
+    width: 228px;
+    min-height: 300px;
+    transform: perspective(950px) rotateY(-7deg);
+    padding: 14px 18px;
+  }
+  .planButton {
+    align-self: flex-start;
+    margin-top: 0;
+    padding-inline: 15px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .floatingCard {
+    transform: none;
+  }
+}
+@media (max-height: 740px) {
+  .home {
+    min-height: calc(100svh - 184px);
+  }
+  .steps {
+    width: 88px;
+    height: 88px;
+  }
+  .miniWidget {
+    width: 68px;
+    height: 68px;
+  }
+  .breathingSpace {
+    min-height: 25px;
+  }
+  .eventTime {
+    font-size: 32px;
+    margin-bottom: 12px;
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .floatingCard,
+  .miniWidget,
+  .steps > div {
+    background: #e7ece7;
+    color: #193b50;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    text-shadow: none;
+  }
+}
+@supports not (backdrop-filter: blur(1px)) {
+  .floatingCard,
+  .miniWidget,
+  .steps > div {
+    background: #e7ece7;
+    color: #193b50;
+  }
+}

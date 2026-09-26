@@ -1,5 +1,6 @@
 import { isDemo } from "./services";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import {
   ForkKnife,
   Moon,
@@ -57,6 +58,9 @@ export function RecordPicker({ close }: { close: () => void }) {
           );
         })}
       </div>
+      <Link to="/history" className={s.secondary} onClick={close}>
+        管理已有记录 · 编辑 / 删除
+      </Link>
       <p className={s.note}>
         {isDemo()
           ? "演示记录保存在当前浏览器。"
@@ -89,7 +93,8 @@ function Editor({
   close: () => void;
   save: (r: LifeRecord) => Promise<void>;
 }) {
-  const { courseReference } = useApp();
+  const { courseReference, remove } = useApp();
+  const [deleteError, setDeleteError] = useState("");
   const kind = typeof initial === "string" ? initial : initial.kind;
   const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
@@ -328,7 +333,38 @@ function Editor({
             rows={2}
           />
         </Field>
+        {deleteError && (
+          <p role="alert" className={s.error}>
+            {deleteError}
+          </p>
+        )}
         <div className={s.formActions}>
+          {typeof initial !== "string" && (
+            <button
+              type="button"
+              className={s.danger}
+              disabled={busy}
+              onClick={async () => {
+                if (
+                  !confirm(
+                    `确认删除“${initial.title}”？${kind === "course" ? "这将删除整门重复课程。" : ""}删除后无法恢复。`,
+                  )
+                )
+                  return;
+                setBusy(true);
+                setDeleteError("");
+                try {
+                  await remove(initial.id);
+                  close();
+                } catch {
+                  setDeleteError("删除未成功，请重试。记录仍然保留。");
+                  setBusy(false);
+                }
+              }}
+            >
+              删除记录
+            </button>
+          )}
           <button type="button" className={s.secondary} onClick={close}>
             取消
           </button>

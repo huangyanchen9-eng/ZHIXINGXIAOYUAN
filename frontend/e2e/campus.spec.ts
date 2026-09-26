@@ -61,13 +61,12 @@ test("延迟对话在用户切换后不污染新用户", async ({ page }) => {
   });
   await page.getByRole("button", { name: "午餐吃什么" }).click();
   await page
-    .locator("aside nav")
-    .first()
+    .getByRole("navigation", { name: "主导航" })
     .getByRole("link", { name: "我的", exact: true })
     .click();
   await page.getByRole("button", { name: "陈同学", exact: true }).click();
   await expect(
-    page.getByRole("heading", { name: /陈同学，今天/ }),
+    page.getByRole("heading", { name: /开始绿色校园生活/ }),
   ).toBeVisible();
   await page.waitForTimeout(2800);
   const messages = await page.evaluate(
@@ -92,7 +91,7 @@ async function login(page: any, name = "林同学") {
   await page.goto("/login");
   await page.getByRole("button", { name: new RegExp(name) }).click();
   await expect(
-    page.getByRole("heading", { name: new RegExp(name + "，今天") }),
+    page.getByRole("heading", { name: /开始绿色校园生活/ }),
   ).toBeVisible();
 }
 test("账号表单验证、密码不持久化、退出保护", async ({ page }) => {
@@ -109,7 +108,7 @@ test("账号表单验证、密码不持久化、退出保护", async ({ page }) 
   await page.getByLabel("确认密码", { exact: true }).fill("test-only-password");
   await page.getByRole("button", { name: "注册并进入校园" }).click();
   await expect(
-    page.getByRole("heading", { name: /测试同学，今天/ }),
+    page.getByRole("heading", { name: /开始绿色校园生活/ }),
   ).toBeVisible();
   const storage = await page.evaluate(() =>
     JSON.stringify({ ...localStorage, ...sessionStorage }),

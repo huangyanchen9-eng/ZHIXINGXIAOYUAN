@@ -10,7 +10,7 @@ test("真实账号：六类记录、刷新恢复、密码修改与再次登录",
   await page.getByLabel("专业", { exact: true }).fill("软件工程");
   await page.getByRole("button", { name: "注册并进入校园" }).click();
   await expect(
-    page.getByRole("heading", { name: /后端测试同学，今天/ }),
+    page.getByRole("heading", { name: /开始绿色校园生活/ }),
   ).toBeVisible();
   const open = async (name: RegExp) => {
     await page.getByRole("button", { name: "记录", exact: true }).click();
@@ -44,7 +44,7 @@ test("真实账号：六类记录、刷新恢复、密码修改与再次登录",
   await save();
   await page.reload();
   await expect(
-    page.getByRole("heading", { name: /后端测试同学，今天/ }),
+    page.getByRole("heading", { name: /开始绿色校园生活/ }),
   ).toBeVisible();
   const state = await page.evaluate(async () =>
     (await fetch("/api/state")).json(),
@@ -70,7 +70,7 @@ test("真实账号：六类记录、刷新恢复、密码修改与再次登录",
   await page.getByLabel("密码", { exact: true }).fill("Changed-browser-2026");
   await page.getByRole("button", { name: "登录", exact: true }).click();
   await expect(
-    page.getByRole("heading", { name: /后端测试同学，今天/ }),
+    page.getByRole("heading", { name: /开始绿色校园生活/ }),
   ).toBeVisible();
   const restored = await page.evaluate(async () =>
     (await fetch("/api/state")).json(),

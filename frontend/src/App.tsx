@@ -1,5 +1,5 @@
 import { isDemo } from "./services";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Routes,
   Route,
@@ -39,7 +39,7 @@ import { Health, History } from "./Health";
 import { Travel, Planner } from "./Travel";
 import { Growth, Assistant } from "./Growth";
 import { Account, Settings, Password } from "./Account";
-import { Card, PageHead, Empty } from "./ui";
+import { Card, PageHead, Empty, Modal } from "./ui";
 import s from "./App.module.css";
 const navItems = [
   { to: "/", name: "今日", icon: House },
@@ -139,11 +139,16 @@ export function FeatureGrid({ life = false }: { life?: boolean }) {
 export default function App() {
   const { user, ready, logout, toast } = useApp();
   const [picker, setPicker] = useState(false);
+  const [controls, setControls] = useState(false);
+  const swipeStart = useRef<{ x: number; y: number; time: number } | null>(
+    null,
+  );
   const location = useLocation(),
     navigate = useNavigate();
   useEffect(() => {
     window.scrollTo(0, 0);
     setPicker(false);
+    setControls(false);
   }, [location.pathname]);
   if (!ready)
     return (
@@ -169,113 +174,133 @@ export default function App() {
     );
   const mainActive = (to: string) =>
     to === "/"
-      ? location.pathname === "/"
+      ? ["/", "/schedule"].includes(location.pathname)
       : to === "/travel"
         ? ["/travel", "/planner"].includes(location.pathname)
         : to === "/life"
-          ? ["/life", "/meals", "/health"].includes(location.pathname)
+          ? ["/life", "/meals", "/health", "/assistant", "/all"].includes(
+              location.pathname,
+            )
           : to === "/account"
             ? ["/account", "/settings", "/password", "/history"].includes(
                 location.pathname,
               )
             : location.pathname === to;
+  const activeIndex = Math.max(
+    0,
+    navItems.findIndex((item) => mainActive(item.to)),
+  );
+  const campusPhotos = [
+    {
+      file: "lake-wide",
+      alt: "大连海事大学日光下的校园建筑与湖面倒影",
+      position: "48% 50%",
+    },
+    { file: "aerial", alt: "大连海事大学校园与海岸航拍", position: "52% 50%" },
+    { file: "garden", alt: "大连海事大学清晨的园间小路", position: "50% 50%" },
+    {
+      file: "hall",
+      alt: "大连海事大学清晨的教学楼与广场",
+      position: "52% 50%",
+    },
+    { file: "avenue", alt: "大连海事大学清晨的校园大道", position: "50% 50%" },
+  ];
+  const campusPhoto = campusPhotos[activeIndex];
+  const startSwipe = (e: React.TouchEvent, onNav = false) => {
+    swipeStart.current = null;
+    if (e.touches.length !== 1 || document.querySelector("dialog[open]"))
+      return;
+    const target = e.target as HTMLElement;
+    if (
+      !onNav &&
+      target.closest(
+        "a, button, input, select, textarea, svg, canvas, [role=dialog], [data-no-swipe], .amap-container",
+      )
+    )
+      return;
+    // Give horizontally scrollable content (timetables/comparisons) its gesture.
+    if (!onNav) {
+      let element: HTMLElement | null = target;
+      while (element && element !== e.currentTarget) {
+        if (
+          /auto|scroll/.test(getComputedStyle(element).overflowX) &&
+          element.scrollWidth > element.clientWidth + 1
+        )
+          return;
+        element = element.parentElement;
+      }
+    }
+    swipeStart.current = {
+      x: e.touches[0].clientX,
+      y: e.touches[0].clientY,
+      time: performance.now(),
+    };
+  };
+  const endSwipe = (e: React.TouchEvent) => {
+    const start = swipeStart.current;
+    swipeStart.current = null;
+    if (
+      !start ||
+      !e.changedTouches.length ||
+      performance.now() - start.time > 750 ||
+      document.querySelector("dialog[open]")
+    )
+      return;
+    const dx = e.changedTouches[0].clientX - start.x;
+    const dy = e.changedTouches[0].clientY - start.y;
+    if (Math.abs(dx) < 65 || Math.abs(dx) < Math.abs(dy) * 1.8) return;
+    const target = activeIndex + (dx < 0 ? 1 : -1);
+    if (target >= 0 && target < navItems.length) {
+      if (e.cancelable) e.preventDefault();
+      navigate(navItems[target].to);
+    }
+  };
   return (
-    <div className={s.shell}>
-      <aside className={s.sidebar}>
-        <Link to="/" className={s.brand}>
-          <span>
-            <Compass size={26} weight="fill" />
-          </span>
-          <div>
-            智行校园<small>ZHIXING CAMPUS</small>
-          </div>
-        </Link>
-        <div className={s.schoolPill}>
-          <span />
-          大连海事大学
-        </div>
-        <small className={s.navLabel}>我的校园日常</small>
-        <nav>
-          {navItems.map(({ to, name, icon: Icon }) => (
-            <Link
-              key={to}
-              to={to}
-              className={mainActive(to) ? s.navActive : ""}
-            >
-              <Icon size={22} weight={mainActive(to) ? "fill" : "regular"} />
-              {name}
-              <span>{mainActive(to) ? "●" : ""}</span>
-            </Link>
-          ))}
-        </nav>
-        <div className={s.navDivider} />
-        <small className={s.navLabel}>快捷访问</small>
-        <nav className={s.secondaryNav}>
-          <NavLink to="/schedule">
-            <CalendarBlank size={20} />
-            我的课表
-          </NavLink>
-          <NavLink to="/assistant">
-            <ChatCircleDots size={20} />
-            AI 伴航<small>DEMO</small>
-          </NavLink>
-          <NavLink to="/all">
-            <GridFour size={20} />
-            全部功能
-          </NavLink>
-        </nav>
-        <div className={s.sidebarBottom}>
-          <div className={s.sidebarNote}>
-            <Leaf size={23} weight="duotone" />
-            <strong>生活不必匆忙</strong>
-            <p>
-              每一次小小的进步，
-              <br />
-              都值得被记录。
-            </p>
-          </div>
-          <Link className={s.sidebarUser} to="/account">
-            <span className={s.avatar}>{user.name[0]}</span>
-            <div>
-              <strong>{user.name}</strong>
-              <small>
-                {user.grade} 级 · {isDemo() ? "演示账户" : "个人账户"}
-              </small>
-            </div>
-            <ArrowUpRight size={16} />
-          </Link>
-        </div>
-      </aside>
-      <div className={s.mainWrap}>
-        <header className={s.topbar}>
-          <div>
-            <span className={s.breadcrumb}>我的校园</span>
-            <span>/</span>
-            <strong>
-              {features.find((x) => x.to === location.pathname)?.name ??
-                navItems.find((x) => mainActive(x.to))?.name ??
-                "智行校园"}
-            </strong>
-          </div>
-          <div>
-            <span className={s.localPill}>
-              <span />
-              {isDemo() ? "本地演示" : "账号已连接"}
-            </span>
-            <button
-              className={s.iconButton}
-              aria-label="查看今日提醒"
-              onClick={() => navigate("/schedule")}
-            >
-              <Bell size={21} />
-              <i />
-            </button>
-            <Link to="/account" className={s.avatar}>
+    <div className={s.glassShell}>
+      <picture className={s.campusBackdrop}>
+        <source
+          media="(max-width: 700px)"
+          srcSet={
+            activeIndex === 0
+              ? "/images/campus-lake-mobile.webp"
+              : `/images/campus-${campusPhoto.file}.webp`
+          }
+        />
+        <img
+          src={`/images/campus-${campusPhoto.file}.webp`}
+          alt={campusPhoto.alt}
+          style={{ objectPosition: campusPhoto.position }}
+          fetchPriority="high"
+        />
+      </picture>
+      <div className={s.campusShade} />
+      <div className={location.pathname === "/" ? s.phonePage : s.glassPage}>
+        <header className={s.glassHeader}>
+          <button
+            className={s.controlButton}
+            aria-label="打开快捷功能"
+            aria-haspopup="dialog"
+            aria-expanded={controls}
+            onClick={() => setControls(true)}
+          >
+            <GridFour size={23} />
+            <span>快捷访问</span>
+          </button>
+          <div className={s.glassIdentity}>
+            <span>{isDemo() ? "本地演示" : "智行校园"}</span>
+            <Link to="/account" aria-label="查看我的账号">
               {user.name[0]}
             </Link>
           </div>
         </header>
-        <main className={s.main}>
+        <main
+          className={s.glassMain}
+          onTouchStart={(e) => startSwipe(e)}
+          onTouchEnd={endSwipe}
+          onTouchCancel={() => {
+            swipeStart.current = null;
+          }}
+        >
           <Routes>
             <Route
               path="/"
@@ -312,21 +337,82 @@ export default function App() {
           </Routes>
         </main>
       </div>
-      <button className={s.fab} onClick={() => setPicker(true)}>
-        <Plus size={22} /> <span>记录</span>
-      </button>
-      <nav className={s.mobileNav}>
+      {location.pathname !== "/" && (
+        <button
+          className={s.glassRecord}
+          aria-label="记录"
+          onClick={() => setPicker(true)}
+        >
+          <Plus size={19} />
+          <span>记录</span>
+        </button>
+      )}
+      <nav
+        className={s.glassNav}
+        aria-label="主导航"
+        onTouchStart={(e) => startSwipe(e, true)}
+        onTouchEnd={endSwipe}
+        onTouchCancel={() => {
+          swipeStart.current = null;
+        }}
+      >
+        <span
+          className={s.navSlider}
+          style={{ transform: `translateX(${activeIndex * 100}%)` }}
+        />
         {navItems.map(({ to, name, icon: Icon }) => (
           <Link
             key={to}
             to={to}
-            className={mainActive(to) ? s.mobileActive : ""}
+            className={mainActive(to) ? s.glassNavActive : ""}
+            aria-current={mainActive(to) ? "page" : undefined}
           >
             <Icon size={23} weight={mainActive(to) ? "fill" : "regular"} />
             <span>{name}</span>
           </Link>
         ))}
       </nav>
+      {controls && (
+        <Modal title="快捷功能" onClose={() => setControls(false)}>
+          <div className={s.controlGrid}>
+            {[
+              {
+                to: "/schedule",
+                name: "我的课表",
+                icon: CalendarBlank,
+                detail: "课程与教室",
+              },
+              {
+                to: "/assistant",
+                name: "AI 伴航",
+                icon: ChatCircleDots,
+                detail: "你的校园对话伙伴",
+              },
+              {
+                to: "/meals",
+                name: "今天吃什么",
+                icon: ForkKnife,
+                detail: "早餐 · 午餐 · 晚餐",
+              },
+              {
+                to: "/all",
+                name: "全部功能",
+                icon: GridFour,
+                detail: "探索校园日常",
+              },
+            ].map(({ to, name, icon: Icon, detail }) => (
+              <Link key={to} to={to} onClick={() => setControls(false)}>
+                <Icon size={30} weight="duotone" />
+                <strong>{name}</strong>
+                <small>{detail}</small>
+              </Link>
+            ))}
+          </div>
+          <p className={s.controlHint}>
+            左右滑动页面或底部导航，切换校园日常。
+          </p>
+        </Modal>
+      )}
       {picker && <RecordPicker close={() => setPicker(false)} />}
       <RecordEditor />
       {toast && (

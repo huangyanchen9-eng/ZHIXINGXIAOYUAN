@@ -116,21 +116,32 @@ export function Modal({
   onClose: () => void;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
+  const titleId = useId();
   useEffect(() => {
-    ref.current?.showModal();
-    return () => ref.current?.close();
+    const dialog = ref.current;
+    const opener = document.activeElement as HTMLElement | null;
+    dialog?.showModal();
+    return () => {
+      dialog?.close();
+      queueMicrotask(() => {
+        if (opener?.isConnected && !document.querySelector("dialog[open]")) {
+          opener.focus({ preventScroll: true });
+        }
+      });
+    };
   }, []);
   return (
     <dialog
       ref={ref}
       className={s.modal}
+      aria-labelledby={titleId}
       onCancel={onClose}
       onClick={(e) => {
         if (e.target === ref.current) onClose();
       }}
     >
       <div className={s.modalHead}>
-        <h2>{title}</h2>
+        <h2 id={titleId}>{title}</h2>
         <button className={s.iconButton} onClick={onClose} aria-label="关闭">
           <X size={22} />
         </button>

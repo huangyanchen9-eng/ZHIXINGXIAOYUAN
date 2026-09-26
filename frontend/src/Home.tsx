@@ -1,26 +1,37 @@
 import { Link } from "react-router-dom";
+import { useEffect, useState, type CSSProperties } from "react";
 import {
   ArrowRight,
   ArrowUpRight,
   CalendarBlank,
-  ChatCircleDots,
-  GridFour,
   ForkKnife,
   Footprints,
   Moon,
-  Sun,
-  CheckCircle,
-  MapTrifold,
-  BookOpen,
-  Plant,
+  Plus,
 } from "@phosphor-icons/react";
 import { useApp } from "./store";
 import { today, dateISO } from "./seed";
 import { courseOnDate, sleepHours, mealTotals } from "./domain";
-import { Card, SectionTitle, Badge, CampusArt, Empty, RecordRow } from "./ui";
+import { nextAgendaItem } from "./homeAgenda";
+import { Modal, Empty } from "./ui";
 import s from "./App.module.css";
+import h from "./Home.module.css";
+
 export function Home({ openRecord }: { openRecord: () => void }) {
-  const { user, data, edit } = useApp();
+  const [clock, setClock] = useState(() => new Date());
+  const [agenda, setAgenda] = useState(false);
+  useEffect(() => {
+    const refresh = () => setClock(new Date());
+    const timer = window.setInterval(refresh, 30_000);
+    window.addEventListener("focus", refresh);
+    document.addEventListener("visibilitychange", refresh);
+    return () => {
+      window.clearInterval(timer);
+      window.removeEventListener("focus", refresh);
+      document.removeEventListener("visibilitychange", refresh);
+    };
+  }, []);
+  const { data, edit } = useApp();
   const d = data!;
   const dayRecords = d.records.filter((r) => r.date === today);
   const courses = d.records.filter((r) =>
@@ -32,289 +43,216 @@ export function Home({ openRecord }: { openRecord: () => void }) {
       (r) => r.kind === "task" || (r.kind === "meal" && r.planned),
     ),
   ].sort((a, b) => (a.start ?? "").localeCompare(b.start ?? ""));
-  const now = new Date().toTimeString().slice(0, 5);
-  const next =
-    courses
-      .filter((r) => (r.end ?? "") > now)
-      .sort((a, b) => (a.start ?? "").localeCompare(b.start ?? ""))[0] ??
-    courses[0];
+  const upcoming = nextAgendaItem(timeline, clock);
   const sleep = dayRecords.find((r) => r.kind === "sleep");
   const steps = dayRecords
     .filter((r) => r.kind === "exercise")
-    .reduce((a, r) => a + (r.steps ?? 0), 0);
+    .reduce((sum, r) => sum + (r.steps ?? 0), 0);
   const meals = mealTotals(dayRecords);
-  const tomorrow = new Date();
+  const tomorrow = new Date(clock);
   tomorrow.setDate(tomorrow.getDate() + 1);
   const tomorrowCount = d.records.filter((r) =>
     courseOnDate(r, dateISO(tomorrow), d.preferences.termStart),
   ).length;
   return (
-    <>
-      <div className={s.homeGreeting}>
-        <div>
-          <span className={s.eyebrow}>
-            {new Date().toLocaleDateString("zh-CN", {
+    <div className={h.home}>
+      <div className={h.intro}>
+        <Link to="/growth" className={h.learningTitle}>
+          <h1>
+            <span>从一件小事，</span>
+            <span>开始绿色校园生活。</span>
+          </h1>
+        </Link>
+        <section className={h.widgets} aria-label="生活记录小组件">
+          <Link
+            to="/health"
+            className={h.steps}
+            aria-label={`今日步数 ${steps}，查看健康分析`}
+            style={
+              { "--progress": `${Math.min(100, steps / 80)}%` } as CSSProperties
+            }
+          >
+            <div>
+              <Footprints size={18} />
+              <strong>{steps.toLocaleString()}</strong>
+              <span>今日步数</span>
+            </div>
+          </Link>
+          <Link to="/growth" className={h.widgetCaption}>
+            <span>一点点行动，一点点成长</span>
+            <small>Small steps, steady growth.</small>
+          </Link>
+          <div className={h.smallWidgets}>
+            <Link
+              to="/health"
+              className={h.miniWidget}
+              aria-label="昨晚睡眠，查看健康分析"
+            >
+              <Moon size={18} />
+              <strong>
+                {sleep ? sleepHours(sleep.sleepStart!, sleep.sleepEnd!) : "—"}
+                <small>h</small>
+              </strong>
+              <span>昨晚睡眠</span>
+            </Link>
+            <Link
+              to="/meals"
+              className={h.miniWidget}
+              aria-label="三餐记录，查看饮食"
+            >
+              <ForkKnife size={18} />
+              <strong>
+                {meals.count}
+                <small>次</small>
+              </strong>
+              <span>三餐记录</span>
+            </Link>
+          </div>
+        </section>
+      </div>
+      <div className={h.breathingSpace} aria-hidden="true" />
+      <section className={h.floatingCard} aria-label="接下来的安排">
+        <div className={h.floatingTop}>
+          <span>
+            <i /> 接下来
+          </span>
+          <button
+            aria-label="打开今天的日程"
+            aria-haspopup="dialog"
+            onClick={() => setAgenda(true)}
+          >
+            <CalendarBlank size={23} />
+          </button>
+        </div>
+        {upcoming ? (
+          <>
+            <div className={h.eventTime}>
+              {upcoming.start}
+              <span>
+                {upcoming.kind === "course" && upcoming.end
+                  ? `— ${upcoming.end}`
+                  : upcoming.duration
+                    ? `预计 ${upcoming.duration} 分钟`
+                    : "今日安排"}
+              </span>
+            </div>
+            <div className={h.eventSummary}>
+              <div>
+                <h2>{upcoming.title}</h2>
+                <p>
+                  {upcoming.place || "为这件事留一点时间"}
+                  {upcoming.source === "示例" ? " · 示例" : ""}
+                </p>
+              </div>
+              <button
+                onClick={() => edit(upcoming)}
+                aria-label="查看接下来的安排"
+              >
+                <ArrowUpRight size={22} />
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className={h.eventTime}>
+              留一点<span>时间给自己</span>
+            </div>
+            <div className={h.eventSummary}>
+              <div>
+                <h2>下一程，由你安排</h2>
+                <p>暂时没有接下来的定时安排</p>
+              </div>
+              <button onClick={openRecord} aria-label="添加今日安排">
+                <ArrowUpRight size={22} />
+              </button>
+            </div>
+          </>
+        )}
+      </section>
+      <div className={h.actions}>
+        <button
+          className={h.recordButton}
+          onClick={openRecord}
+          aria-label="记录"
+        >
+          <Plus size={20} />
+          记录
+        </button>
+        <Link className={h.planButton} to="/planner">
+          安排今日行程 <ArrowUpRight size={18} />
+        </Link>
+      </div>
+      {agenda && (
+        <Modal title="今天，按自己的节奏" onClose={() => setAgenda(false)}>
+          <div className={h.agendaDate}>
+            {clock.toLocaleDateString("zh-CN", {
               month: "long",
               day: "numeric",
               weekday: "long",
-            })}{" "}
-            · 大连海事大学
-          </span>
-          <h1>
-            {user!.name}，今天也要好好生活<span>。</span>
-          </h1>
-          <p>把重要的事安排好，也为自己留一点时间。</p>
-        </div>
-        <div className={s.season}>
-          <Sun size={25} weight="duotone" />
-          <div>
-            秋日校园<small>宜出发，也宜慢下来</small>
-          </div>
-        </div>
-      </div>
-      <section className={s.hero}>
-        <div className={s.heroText}>
-          <span className={s.heroLabel}>
-            <span /> YOUR DAY, WELL PLANNED
-          </span>
-          <h2>
-            每一程，
-            <br />
-            都走向更好的自己。
-          </h2>
-          <p>
-            从一节课、一顿饭到一次散步，
-            <br />
-            让智行陪你，把今天过得刚刚好。
-          </p>
-          <Link className={s.primary} to="/planner">
-            安排今日行程 <ArrowUpRight size={19} />
-          </Link>
-        </div>
-        <CampusArt />
-        <div className={s.heroCaption}>凌水校园 · 在这里，遇见你的日常</div>
-      </section>
-      <div className={s.shortcuts}>
-        {[
-          {
-            to: "/schedule",
-            icon: CalendarBlank,
-            title: "我的课表",
-            desc: "下一节，不慌张",
-          },
-          {
-            to: "/assistant",
-            icon: ChatCircleDots,
-            title: "AI 伴航",
-            desc: "想说的，都在这里",
-          },
-          {
-            to: "/meals",
-            icon: ForkKnife,
-            title: "今天吃什么",
-            desc: "认真对待每一餐",
-          },
-          {
-            to: "/all",
-            icon: GridFour,
-            title: "全部功能",
-            desc: "校园生活，一站抵达",
-          },
-        ].map(({ to, icon: Icon, title, desc }) => (
-          <Link key={to} to={to}>
-            <span>
-              <Icon size={25} weight="duotone" />
-            </span>
-            <div>
-              <strong>{title}</strong>
-              <small>{desc}</small>
-            </div>
-            <ArrowUpRight size={17} />
-          </Link>
-        ))}
-      </div>
-      <div className={s.dashboardGrid}>
-        <div>
-          <SectionTitle
-            title="今天，按自己的节奏"
-            to="/schedule"
-            more="查看课表"
-          />
-          <Card>
-            {next && (
-              <div className={s.nextClass}>
-                <div>
-                  <Badge>今日课程</Badge>
-                  <h3>{next.title}</h3>
-                  <p>
-                    {next.start}—{next.end} <span> · </span> {next.place}
-                  </p>
-                </div>
-                <Link
-                  to={"/travel?to=" + encodeURIComponent(next.place ?? "")}
-                  className={s.roundLink}
-                  aria-label="前往课程地点"
-                >
-                  <ArrowUpRight size={24} />
-                </Link>
-              </div>
-            )}
-            <div className={s.timeline}>
-              {timeline.length ? (
-                timeline.map((r) => (
-                  <div className={s.timelineItem} key={r.id}>
-                    <time>{r.start ?? "待安排"}</time>
-                    <span className={r.done ? s.timelineDone : ""} />
-                    <div>
-                      <strong>{r.title}</strong>
-                      <small>
-                        {r.place ?? "留一点时间给自己"} ·{" "}
-                        {r.kind === "course"
-                          ? "课程"
-                          : r.kind === "meal"
-                            ? "用餐计划"
-                            : r.done
-                              ? "已完成"
-                              : "待办"}
-                        {r.source === "示例" ? " · 示例" : ""}
-                      </small>
-                    </div>
-                    <button
-                      className={s.iconButton}
-                      onClick={() => edit(r)}
-                      aria-label={"查看" + r.title}
-                    >
-                      <ArrowRight size={18} />
-                    </button>
-                  </div>
-                ))
-              ) : (
-                <Empty title="今天的时间，由你安排" />
-              )}
-            </div>
-            <button className={s.textButton} onClick={openRecord}>
-              ＋ 添加一件今天想做的事
-            </button>
-          </Card>
-          <div className={s.tomorrow}>
-            <CalendarBlank size={21} />
-            <div>
-              <strong>给明天留一份从容</strong>
-              <p>明天有 {tomorrowCount} 节课程，睡前再看一眼安排吧。</p>
-            </div>
+            })}
             <Link to="/schedule">
-              <ArrowRight size={20} />
+              查看课表 <ArrowUpRight size={16} />
             </Link>
           </div>
-        </div>
-        <div>
-          <SectionTitle title="生活的小小进度" to="/health" more="健康概览" />
-          <Card>
-            <div className={s.wellness}>
-              <div
-                className={s.progressRing}
-                style={
-                  {
-                    "--progress": `${Math.min(100, steps / 80)}%`,
-                  } as React.CSSProperties
-                }
-              >
-                <Footprints size={23} />
-                <strong>{steps.toLocaleString()}</strong>
-                <small>今日步数</small>
-              </div>
-              <div className={s.wellnessCopy}>
-                <Badge tone="orange">慢慢来，也很好</Badge>
-                <h3>每一步，都算数</h3>
-                <p>
-                  手动 / 示例记录
-                  <br />
-                  每日参考目标 8,000 步
-                </p>
-              </div>
-            </div>
-            <div className={s.healthMini}>
-              <div>
-                <Moon size={20} />
-                <span>
-                  昨夜睡眠
-                  <strong>
-                    {sleep
-                      ? sleepHours(sleep.sleepStart!, sleep.sleepEnd!)
-                      : "—"}{" "}
-                    <small>小时</small>
-                  </strong>
-                </span>
-              </div>
-              <div>
-                <ForkKnife size={20} />
-                <span>
-                  三餐记录
-                  <strong>
-                    {meals.count} <small>次已记录</small>
-                  </strong>
-                </span>
-              </div>
-            </div>
-            <button className={`${s.secondary} ${s.full}`} onClick={openRecord}>
-              记录我的生活 <ArrowRight size={16} />
-            </button>
-          </Card>
-          <section className={s.learningCard}>
-            <div className={s.learningTop}>
-              <BookOpen size={24} weight="duotone" />
-              <small>给成长，留 3 分钟</small>
-            </div>
-            <h3>
-              从一件小事，
-              <br />
-              开始绿色校园生活。
-            </h3>
-            <p>今日微课 · 低碳行动与青年担当</p>
-            <Link to="/growth">
-              开始今日伴学 <ArrowUpRight size={18} />
-            </Link>
-            <Plant className={s.learningPlant} size={90} weight="duotone" />
-          </section>
-        </div>
-      </div>
-      <section className={s.dayAdvice}>
-        <SectionTitle title="生活有序，也要有趣" />
-        <div>
-          {[
-            {
-              icon: Sun,
-              title: "早晨 · 好好开始",
-              text: "早餐、晨间伴学，留出从容出发的时间。",
-            },
-            {
-              icon: BookOpen,
-              title: "上午 · 专注当下",
-              text: "专注一会儿，也记得喝水和放松双眼。",
-            },
-            {
-              icon: MapTrifold,
-              title: "下午 · 出去走走",
-              text: "去图书馆，或者给自己安排一次散步。",
-            },
-            {
-              icon: Moon,
-              title: "晚间 · 慢慢收尾",
-              text: "记录今天的心情，为明天留一份计划。",
-            },
-          ].map(({ icon: Icon, title, text }) => (
-            <Card key={title}>
-              <Icon size={24} weight="duotone" />
-              <h3>{title}</h3>
-              <p>{text}</p>
-            </Card>
-          ))}
-        </div>
-      </section>
-      <footer className={s.pageFooter}>
-        <Plant size={16} /> 好好学习，也好好生活。{" "}
-        <span>ZHIXING CAMPUS / 2026</span>
-      </footer>
-    </>
+          <div className={s.timeline}>
+            {timeline.length ? (
+              timeline.map((r) => (
+                <div className={s.timelineItem} key={r.id}>
+                  <time>{r.start ?? "待安排"}</time>
+                  <span className={r.done ? s.timelineDone : ""} />
+                  <div>
+                    <strong>{r.title}</strong>
+                    <small>
+                      {r.place ?? "留一点时间给自己"} ·{" "}
+                      {r.kind === "course"
+                        ? "课程"
+                        : r.kind === "meal"
+                          ? "用餐计划"
+                          : r.done
+                            ? "已完成"
+                            : "待办"}
+                      {r.source === "示例" ? " · 示例" : ""}
+                    </small>
+                    {r.kind === "course" && r.place && (
+                      <Link
+                        className={h.courseLink}
+                        to={"/travel?to=" + encodeURIComponent(r.place)}
+                      >
+                        前往课程地点 <ArrowUpRight size={13} />
+                      </Link>
+                    )}
+                  </div>
+                  <button
+                    className={s.iconButton}
+                    onClick={() => {
+                      setAgenda(false);
+                      edit(r);
+                    }}
+                    aria-label={"查看" + r.title}
+                  >
+                    <ArrowRight size={18} />
+                  </button>
+                </div>
+              ))
+            ) : (
+              <Empty title="今天的时间，由你安排" />
+            )}
+          </div>
+          <button
+            className={s.secondary}
+            onClick={() => {
+              setAgenda(false);
+              openRecord();
+            }}
+          >
+            ＋ 添加一件今天想做的事
+          </button>
+          <div className={h.tomorrow}>
+            <CalendarBlank size={19} />
+            <p>明天有 {tomorrowCount} 节课程，睡前再看一眼安排吧。</p>
+          </div>
+        </Modal>
+      )}
+    </div>
   );
 }
