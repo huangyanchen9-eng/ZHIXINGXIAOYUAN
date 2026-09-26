@@ -21,3 +21,9 @@ All are official DMU photographs, compressed to WebP (quality 80, maximum width 
 
 Source pages: https://english.dlmu.edu.cn/Home/About/About_Us.htm and https://www.dlmu.edu.cn/info/1104/31344.htm (校园的黎明). Subpages inherit their parent navigation section's photograph.
 
+
+## Login gate photograph
+Source: https://www.dlmu.edu.cn/old/info/1089/3001.htm (校门). Original: https://www.dlmu.edu.cn/__local/A/BE/4D/2057754F823EEF3B8D0698366DF_24E6BE98_36890.jpg . Original resolution 700 × 246; converted to campus-gate-day.webp without upscaling. This archival daytime image can appear soft on large screens. Same preview licensing boundary as above.
+
+## Daylight login panorama
+Source page: https://alumni.dlmu.edu.cn/info/1053/1311.htm . Original: https://alumni.dlmu.edu.cn/__local/0/B3/A8/5895D13F7C19A9CFA6498C95071_E2D500E1_19D5A8.jpg . Converted to campus-harbor-day.webp at original dimensions, quality 85. Replaces the archival gate image on the login/register page. Same preview licensing boundary applies.

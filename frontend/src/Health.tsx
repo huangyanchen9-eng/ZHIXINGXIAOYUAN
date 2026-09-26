@@ -6,6 +6,7 @@ import {
   ForkKnife,
   Smiley,
   DownloadSimple,
+  Plus,
 } from "@phosphor-icons/react";
 import { useApp } from "./store";
 import { today, dateISO } from "./seed";
@@ -18,7 +19,7 @@ function weekAgo() {
   d.setDate(d.getDate() - 6);
   return dateISO(d);
 }
-export function Health() {
+export function Health({ openRecord }: { openRecord: () => void }) {
   const { data, edit } = useApp();
   const [start, setStart] = useState(weekAgo()),
     [end, setEnd] = useState(today),
@@ -57,7 +58,7 @@ export function Health() {
           Math.max(1, rs.filter((r) => r.kind === "mood").length);
   });
   return (
-    <>
+    <div className={s.healthPage}>
       <PageHead
         eyebrow="FEEL WELL / 健康分析"
         title="听见身体，也照顾心情"
@@ -154,7 +155,11 @@ export function Health() {
                 </button>
               ))}
             </div>
-            <Trend values={vals} labels={days.map((d) => d.slice(5))} />
+            <Trend
+              color="#ffffff"
+              values={vals}
+              labels={days.map((d) => d.slice(5))}
+            />
             <p className={s.note}>
               显示所选结束日期之前 7 天；无记录日期表示未记录，不代表实际为零。
             </p>
@@ -194,7 +199,7 @@ export function Health() {
       ) : (
         <Empty title="这段时间还没有健康记录" />
       )}
-      <Card className={s.settingsGroup}>
+      <Card className={`${s.settingsGroup} ${s.healthPrediction}`}>
         <div className={s.sectionTitle}>
           <h2>下一周健康趋势</h2>
           <Badge tone="orange">LSTM 预测演示</Badge>
@@ -213,6 +218,7 @@ export function Health() {
         {predict && (
           <>
             <Trend
+              color="#ffffff"
               values={[74, 77, 76, 80, 79, 82, 81]}
               labels={["周一", "周二", "周三", "周四", "周五", "周六", "周日"]}
             />
@@ -220,7 +226,13 @@ export function Health() {
           </>
         )}
       </Card>
-    </>
+      <div className={s.healthActions}>
+        <button className={s.secondary} onClick={openRecord} aria-label="记录">
+          <Plus size={19} />
+          记录
+        </button>
+      </div>
+    </div>
   );
 }
 export function History() {
@@ -252,7 +264,7 @@ export function History() {
       return a;
     }, {});
   return (
-    <>
+    <div className={s.historyPage}>
       <PageHead
         eyebrow="LOOK BACK / 生活记录"
         title="每一个日常，都有迹可循"
@@ -328,6 +340,7 @@ export function History() {
         <Card>
           <h2>记录分类</h2>
           <Trend
+            color="#ffffff"
             values={Object.keys(kindLabels).map(
               (k) => rows.filter((r) => r.kind === k).length,
             )}
@@ -354,6 +367,6 @@ export function History() {
           </Link>
         </Card>
       </div>
-    </>
+    </div>
   );
 }

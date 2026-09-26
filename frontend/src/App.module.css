@@ -1760,9 +1760,27 @@ th {
   align-items: center;
   gap: 20px;
   padding: 26px;
-  background: var(--campus-soft);
-  border-radius: 16px;
+  background: rgb(255 255 255 / 35%);
+  border: 1px solid #ffffff85;
+  border-radius: 26px;
+  box-shadow:
+    inset 0 1px 0 #ffffff80,
+    0 12px 32px #132e4324;
+  backdrop-filter: blur(24px) saturate(1.1);
+  -webkit-backdrop-filter: blur(24px) saturate(1.1);
   margin-bottom: 25px;
+}
+.demoSwitchCard {
+  margin-top: 24px;
+}
+.profileHero .avatar {
+  background: #ffffff35;
+  border: 1px solid #ffffff80;
+}
+@supports not (backdrop-filter: blur(1px)) {
+  .profileHero {
+    background: #dce5ed;
+  }
 }
 .profileHero .avatar {
   width: 65px;
@@ -1770,11 +1788,12 @@ th {
   font-size: 22px;
 }
 .profileHero h2 {
+  color: #fff;
   font-size: 24px;
 }
 .profileHero p {
   font-size: 12px;
-  color: var(--campus-muted);
+  color: #fff;
 }
 .profileHero > .badge {
   margin-left: auto;
@@ -2558,6 +2577,38 @@ th {
   min-width: 0;
   touch-action: auto;
 }
+.glassShell .chat > .pageHead > button,
+.glassShell .chat > .note,
+.glassShell .historyPage .pageHead > button,
+.historyPage .chart .barValue,
+.historyPage .chart small,
+.glassShell .healthPage .pageHead > button,
+.healthPage .field > span,
+.healthPage .metricLabel,
+.healthPage .chart .barValue,
+.healthPage .chart small,
+.healthPage .healthPrediction .badge {
+  color: #fff;
+  text-shadow: 0 1px 4px #173e5180;
+}
+.historyPage .chartBars,
+.healthPage .chartBars {
+  border-bottom-color: #ffffffa6;
+}
+.healthPage .healthPrediction {
+  margin-top: 24px;
+}
+.healthPage .healthPrediction .badge {
+  background: #173e5166;
+}
+.healthActions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 24px;
+}
+.glassShell .healthActions button {
+  border-radius: 24px;
+}
 .glassShell .glassRecord {
   position: fixed;
   right: max(24px, calc((100vw - 460px) / 2));
@@ -2752,5 +2803,198 @@ th {
   .controlGrid a {
     background: #edf2ed;
     color: #173e51;
+  }
+}
+
+/* Account entry shares the campus photograph and frosted surfaces. */
+.auth.authGlass {
+  position: relative;
+  isolation: isolate;
+  background: transparent;
+  grid-template-columns: minmax(0, 1fr) minmax(380px, 500px);
+  gap: clamp(24px, 5vw, 80px);
+  padding: 40px max(24px, calc((100vw - 1200px) / 2));
+  color: #fff;
+}
+.authShade {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(110deg, #102e4e85, #18394e30 55%, #102e4e70);
+}
+.authGlass .authStory {
+  display: flex;
+  flex-direction: column;
+  background: transparent;
+  min-height: auto;
+  padding: 12px 0;
+  overflow: visible;
+}
+.authGlass .brand,
+.authGlass .brand small,
+.authGlass .authCopy > p,
+.authGlass .authCopy h1 span,
+.authGlass .authFoot {
+  color: #fff;
+}
+.authGlass .brand > span {
+  background: #ffffff30;
+  border: 1px solid #ffffff70;
+  backdrop-filter: blur(16px);
+}
+.authGlass .authCopy {
+  margin: auto 0;
+  padding: 60px 0;
+  max-width: none;
+}
+.authGlass .authCopy h1 {
+  font-family: "Noto Serif SC", "Songti SC", "STSong", "SimSun", serif;
+  font-size: clamp(40px, 4.8vw, 68px);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-shadow: 0 2px 20px #163b5160;
+}
+.authGlass .authCopy > .badge {
+  background: #ffffff26;
+  color: #fff;
+  border: 1px solid #ffffff60;
+}
+.authGlass .authFoot {
+  margin-top: 64px;
+  border-color: #ffffff60;
+}
+.authGlass .authPanel {
+  padding: 0;
+  align-self: center;
+}
+.authGlass .authForm {
+  max-width: none;
+  padding: 32px;
+  border-radius: 28px;
+  border: 1px solid #ffffff80;
+  background: #233e5159;
+  backdrop-filter: blur(26px) saturate(0.85);
+  -webkit-backdrop-filter: blur(26px) saturate(0.85);
+  box-shadow:
+    inset 0 1px 0 #ffffff65,
+    0 20px 60px #102c4930;
+}
+.authGlass .authForm > h2 {
+  font-weight: 500;
+}
+.authGlass .eyebrow,
+.authGlass .muted,
+.authGlass .field > span,
+.authGlass .field > small:not(.error),
+.authGlass .authSwitch,
+.authGlass .authSwitch a,
+.authGlass .dividerText,
+.authGlass .demoUsers small,
+.authGlass .demoUsers > button > svg,
+.authGlass .authDisclaimer {
+  color: #fff;
+}
+.authGlass .authSwitch a {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.authGlass .notice {
+  background: #142f4b45;
+  color: #fff;
+  border: 1px solid #ffffff35;
+  border-radius: 12px;
+}
+.authGlass .field input,
+.authGlass .field select {
+  min-height: 46px;
+  border: 1px solid #ffffff80;
+  border-radius: 12px;
+  background: #ffffffd9;
+  color: #163e56;
+}
+.authGlass .primary,
+.authGlass .demoUsers > button {
+  color: #fff;
+  background: #ffffff30;
+  border: 1px solid #ffffff80;
+  border-radius: 14px;
+  backdrop-filter: blur(16px);
+  box-shadow: inset 0 1px 0 #ffffff50;
+}
+.authGlass .primary {
+  background: #1473c960;
+  min-height: 48px;
+}
+.authGlass .demoUsers .avatar {
+  background: #ffffff30;
+  color: #fff;
+  border: 1px solid #ffffff60;
+}
+.authGlass .authDisclaimer {
+  margin-top: 20px;
+  line-height: 1.8;
+  text-shadow: 0 1px 5px #102b46;
+}
+.authGlass .error {
+  color: #fff0eb;
+  background: #802d3bba;
+  border-radius: 6px;
+  padding: 4px 8px;
+}
+.authGlass :is(button, a, input, select):focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+@media (max-width: 900px) {
+  .auth.authGlass {
+    display: block;
+    padding: 24px;
+  }
+  .authGlass .authStory,
+  .authGlass .authPanel {
+    max-width: 500px;
+    margin: 0 auto;
+  }
+  .authGlass .authCopy {
+    padding: 28px 0;
+    margin: 0;
+  }
+  .authGlass .authCopy h1 {
+    font-size: 38px;
+    margin: 0;
+  }
+  .authGlass .authCopy > .badge,
+  .authGlass .authCopy > p,
+  .authGlass .authFoot {
+    display: none;
+  }
+}
+@media (max-width: 480px) {
+  .auth.authGlass {
+    padding: 20px 18px 32px;
+  }
+  .authGlass .authForm {
+    padding: 24px 20px;
+  }
+  .authGlass .authCopy h1 {
+    font-size: 32px;
+  }
+  .authGlass .authForm > h2 {
+    font-size: 25px;
+  }
+  .authGlass .formGrid {
+    grid-template-columns: 1fr;
+  }
+}
+@supports not (backdrop-filter: blur(1px)) {
+  .authGlass .authForm {
+    background: #304e65;
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .authGlass .authForm {
+    background: #304e65;
+    backdrop-filter: none;
   }
 }

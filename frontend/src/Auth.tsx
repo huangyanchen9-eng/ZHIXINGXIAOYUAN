@@ -10,7 +10,7 @@ import {
 import { authService } from "./services";
 import { useApp } from "./store";
 import { profiles } from "./seed";
-import { Field, CampusArt, Badge } from "./ui";
+import { Field, Badge } from "./ui";
 import s from "./App.module.css";
 export function Auth({ register = false }: { register?: boolean }) {
   const { enter } = useApp(),
@@ -57,7 +57,19 @@ export function Auth({ register = false }: { register?: boolean }) {
     }
   };
   return (
-    <main className={s.auth}>
+    <main className={`${s.auth} ${s.authGlass}`}>
+      <picture className={s.campusBackdrop}>
+        <source
+          media="(max-width: 700px)"
+          srcSet="/images/campus-harbor-day.webp"
+        />
+        <img
+          src="/images/campus-harbor-day.webp"
+          alt="大连海事大学白天的校园与教学码头全景"
+          fetchPriority="high" style={{ objectPosition: "45% 50%" }}
+        />
+      </picture>
+      <div className={s.authShade} />
       <section className={s.authStory}>
         <Link to="/login" className={s.brand}>
           <span>
@@ -79,7 +91,6 @@ export function Auth({ register = false }: { register?: boolean }) {
             <br />
             在每一个平凡的校园日常里，找到自己的节奏。
           </p>
-          <CampusArt />
           <div className={s.authFoot}>
             <Plant size={22} />
             <span>让校园生活，多一点从容。</span>
@@ -236,3 +247,5 @@ export function Auth({ register = false }: { register?: boolean }) {
     </main>
   );
 }
+
+

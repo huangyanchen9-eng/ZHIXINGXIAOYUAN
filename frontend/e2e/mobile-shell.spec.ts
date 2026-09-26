@@ -82,6 +82,19 @@ test("手机玻璃界面：五页背景、快捷面板、日历、滑动和横�
     ).toBeTruthy();
   }
   expect(backgrounds.size).toBe(5);
+  await page.goto('/health');
+  for (const width of [706, 390]) {
+    await page.setViewportSize({ width, height: 898 });
+    const prediction = page.locator('section').filter({ has: page.getByRole('heading', { name: '下一周健康趋势' }) });
+    const record = page.getByRole('button', { name: '记录', exact: true });
+    const cardBox = (await prediction.boundingBox())!;
+    const buttonBox = (await record.boundingBox())!;
+    expect(buttonBox.y - (cardBox.y + cardBox.height)).toBeGreaterThanOrEqual(23);
+    await page.screenshot({ path: `screenshots/health-white-${width}.png`, fullPage: true });
+  }
+  await page.getByRole('button', { name: '记录', exact: true }).click();
+  await expect(page.getByRole('dialog', { name: '记录一下，今天的生活' })).toBeVisible();
+  await page.keyboard.press('Escape');
   await page.goto("/schedule");
   const scroller = page.locator('[class*="scheduleScroll"]');
   await expect(scroller).toBeVisible();

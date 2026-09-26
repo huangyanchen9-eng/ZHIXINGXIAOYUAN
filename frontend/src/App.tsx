@@ -311,7 +311,10 @@ export default function App() {
             <Route path="/planner" element={<Planner />} />
             <Route path="/life" element={<FeatureGrid life />} />
             <Route path="/meals" element={<Meals />} />
-            <Route path="/health" element={<Health />} />
+            <Route
+              path="/health"
+              element={<Health openRecord={() => setPicker(true)} />}
+            />
             <Route path="/history" element={<History />} />
             <Route path="/growth" element={<Growth />} />
             <Route path="/assistant" element={<Assistant />} />
@@ -337,7 +340,7 @@ export default function App() {
           </Routes>
         </main>
       </div>
-      {location.pathname !== "/" && (
+      {!["/", "/health"].includes(location.pathname) && (
         <button
           className={s.glassRecord}
           aria-label="记录"

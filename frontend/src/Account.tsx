@@ -161,7 +161,7 @@ export function Account() {
             ))}
           </Card>
           {isDemo() && (
-            <Card className={s.settingsGroup}>
+            <Card className={`${s.settingsGroup} ${s.demoSwitchCard}`}>
               <h2>切换演示用户</h2>
               <p className={s.muted}>
                 用于验证不同用户的记录与偏好不会混用，不代表真实权限隔离。
