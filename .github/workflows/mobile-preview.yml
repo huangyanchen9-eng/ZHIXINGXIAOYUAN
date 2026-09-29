@@ -1,0 +1,45 @@
+name: Publish mobile frontend preview
+on:
+  push:
+    branches: [main]
+    paths: ['mobile-preview/**', '.github/workflows/mobile-preview.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: mobile-pages
+  cancel-in-progress: true
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Unpack verified frontend and cover
+        run: |
+          node <<'NODE'
+          const fs=require('fs'),path=require('path'),zlib=require('zlib');
+          const entries=JSON.parse(zlib.gunzipSync(Buffer.from(fs.readFileSync('mobile-preview/site.bundle.b64','utf8').trim(),'base64')));
+          const root=path.resolve('_mobile_site');
+          for(const f of entries){
+            const target=path.resolve(root,f.path);
+            if(!target.startsWith(root+path.sep))throw Error('Invalid asset path');
+            fs.mkdirSync(path.dirname(target),{recursive:true});
+            fs.writeFileSync(target,Buffer.from(f.data,'base64'));
+          }
+          if(!fs.existsSync(path.join(root,'index.html'))||!fs.existsSync(path.join(root,'app.html')))throw Error('Missing entry pages');
+          NODE
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _mobile_site
+      - uses: actions/configure-pages@v5
+      - name: Deploy preview
+        id: deployment
+        uses: actions/deploy-pages@v4
